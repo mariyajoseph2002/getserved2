@@ -1,0 +1,200 @@
+/* import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+class BookingPage extends StatelessWidget {
+  final DocumentSnapshot provider; // The selected provider
+
+  const BookingPage({super.key, required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Book ${provider['firstName']} ${provider['lastName']}"),
+        backgroundColor: Colors.teal,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${provider['firstName']} ${provider['lastName']}",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text("Service Type: ${provider['serviceType']}"),
+            const SizedBox(height: 8),
+            Text("Charge: \$${provider['charge']}"),
+            const SizedBox(height: 8),
+            Text("Email: ${provider['email']}"),
+            const SizedBox(height: 8),
+            Text("Gender: ${provider['gender']}"),
+            const SizedBox(height: 16),
+            // Booking button
+            ElevatedButton(
+              onPressed: () {
+                // Implement booking logic here
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Booking Successful!")),
+                );
+              },
+              child: const Text("Book Now"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+ */
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // for date formatting
+
+class BookingPage extends StatefulWidget {
+  final DocumentSnapshot provider; // The selected provider
+
+  const BookingPage({super.key, required this.provider});
+
+  @override
+  _BookingPageState createState() => _BookingPageState();
+}
+
+class _BookingPageState extends State<BookingPage> {
+  DateTime? _selectedDate;
+  String? _selectedTimeSlot;
+  final _timeSlots = ["9-12", "2-5"];
+  final _customerEmailController = TextEditingController(); // Customer email input
+
+  // Function to open the date picker
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(), // Start from current day
+      lastDate: DateTime(2101), // Limit to future dates
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  // Function to store booking details in Firestore
+  Future<void> _bookService() async {
+    if (_selectedDate == null || _selectedTimeSlot == null || _customerEmailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select date, time slot, and enter your email")),
+      );
+      return;
+    }
+
+    // Save booking details to Firestore
+    await FirebaseFirestore.instance.collection('bookings').add({
+      'providerEmail': widget.provider['email'],
+      'customerEmail': _customerEmailController.text,
+      'date': DateFormat('yyyy-MM-dd').format(_selectedDate!), // Format date
+      'timeSlot': _selectedTimeSlot,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Booking Successful!")),
+    );
+
+    // Clear the input after booking
+    _customerEmailController.clear();
+    setState(() {
+      _selectedDate = null;
+      _selectedTimeSlot = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Book ${widget.provider['firstName']} ${widget.provider['lastName']}"),
+        backgroundColor: Colors.teal,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${widget.provider['firstName']} ${widget.provider['lastName']}",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text("Service Type: ${widget.provider['serviceType']}"),
+            const SizedBox(height: 8),
+            Text("Charge: \$${widget.provider['charge']}"),
+            const SizedBox(height: 8),
+            Text("Email: ${widget.provider['email']}"),
+            const SizedBox(height: 8),
+            Text("Gender: ${widget.provider['gender']}"),
+            const SizedBox(height: 16),
+
+            // Customer email input field
+            TextField(
+              controller: _customerEmailController,
+              decoration: const InputDecoration(
+                labelText: "Your Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Date selection
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => _selectDate(context),
+                  child: const Text("Select Date"),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                ),
+                const SizedBox(width: 16),
+                Text(_selectedDate == null
+                    ? "No date selected"
+                    : DateFormat('yyyy-MM-dd').format(_selectedDate!)),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Time slot selection
+            DropdownButton<String>(
+              value: _selectedTimeSlot,
+              hint: const Text("Select Time Slot"),
+              items: _timeSlots.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  _selectedTimeSlot = newValue;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Booking button
+            ElevatedButton(
+              onPressed: _bookService,
+              child: const Text("Book Now"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
