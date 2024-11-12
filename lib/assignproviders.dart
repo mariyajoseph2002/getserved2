@@ -23,6 +23,7 @@ class AssignProviders extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.teal,
         title: const Text("Assign Provider"),
       ),
       body: Padding(
@@ -81,7 +82,7 @@ class AssignProviders extends StatelessWidget {
                             children: [
                               Text("Email: ${providerData['email'] ?? 'N/A'}"),
                               Text("Phone: ${providerData['phone'] ?? 'N/A'}"),
-                              Text("Experience: ${providerData['experience'] ?? 'N/A'}"),
+                              Text("Experience: ${providerData['experience'] ?? 'Experienced proffessional'}"),
                             ],
                           ),
                           trailing: ElevatedButton(

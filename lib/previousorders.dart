@@ -33,13 +33,13 @@ class _PreviousOrdersState extends State<PreviousOrders> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Previous Orders"),
+        title: const Text("Previous Bookings"),
         backgroundColor:  Color.fromARGB(255, 243, 173, 103),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('bookings')
-            .where('Email', isEqualTo: user?.email)
+            .where('customerEmail', isEqualTo: user?.email)
             .where('status', isEqualTo: 'done') // Filter by status 'done'
             .snapshots(),
         builder: (context, snapshot) {
@@ -65,7 +65,7 @@ class _PreviousOrdersState extends State<PreviousOrders> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Provider: ${order['providerEmail']}'),
+                      Text('Provider: ${order['serviceProviderEmail']}'),
                       //Text('Date: ${date.toLocal()}'.split(' ')[0]),
                     ],
                   ),
@@ -76,7 +76,7 @@ class _PreviousOrdersState extends State<PreviousOrders> {
                         MaterialPageRoute(
                           builder: (context) => FeedbackPage(
                             customerEmail: user!.email!,
-                            providerEmail: order['providerEmail'],
+                            providerEmail: order['serviceProviderEmail'],
                           ),
                         ),
                       );
@@ -97,7 +97,7 @@ class _PreviousOrdersState extends State<PreviousOrders> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
-            label: 'Previous Orders',
+            label: 'Previous Bookings',
           ),
         ],
         currentIndex: _selectedIndex,

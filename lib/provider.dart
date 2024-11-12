@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 import 'reviews_ratings.dart';
 import 'edit_provider.dart'; // Import the edit provider page
+import 'complaints_page.dart'; // Import complaints page
 
 class Provider extends StatefulWidget {
   const Provider({super.key});
@@ -61,6 +62,11 @@ class _ProviderState extends State<Provider> {
               context,
               MaterialPageRoute(builder: (context) => const ReviewsRatingsPage()),
             );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ComplaintsPage()), // Navigate to Complaints page
+            );
           }
         },
         items: const [
@@ -72,76 +78,81 @@ class _ProviderState extends State<Provider> {
             icon: Icon(Icons.star),
             label: 'Reviews & Ratings',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.report_problem),
+            label: 'Complaints',
+          ),
         ],
       ),
     );
   }
-Widget bookingDetails() {
-  return StreamBuilder<QuerySnapshot>(
-    stream: FirebaseFirestore.instance
-        .collection('bookings')
-        .where('providerEmail', isEqualTo: providerEmail)
-        .snapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return const Center(child: Text('No bookings available.'));
-      }
 
-      final bookings = snapshot.data!.docs;
+  Widget bookingDetails() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('bookings')
+          .where('serviceProviderEmail', isEqualTo: providerEmail)
+          .where('status', isEqualTo: 'assigned')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No bookings available.'));
+        }
 
-      return ListView.builder(
-        itemCount: bookings.length,
-        itemBuilder: (context, index) {
-          var booking = bookings[index];
-          var bookingData = booking.data() as Map<String, dynamic>; // Cast to Map
+        final bookings = snapshot.data!.docs;
 
-          DateTime? date;
-          try {
-            date = (bookingData['date'] as Timestamp).toDate();
-          } catch (e) {
-            date = null;
-          }
+        return ListView.builder(
+          itemCount: bookings.length,
+          itemBuilder: (context, index) {
+            var booking = bookings[index];
+            var bookingData = booking.data() as Map<String, dynamic>; // Cast to Map
 
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Booking ID: ${booking.id}'),
-                  const SizedBox(height: 8),
-                  Text('Date: ${date != null ? date.toLocal().toString().split(' ')[0] : 'No date available'}'),
-                  if (bookingData.containsKey('slot')) // Now this works
-                    Text('Slot: ${bookingData['slot']}'),
-                  Text('Customer Phone: ${bookingData['Phone']}'),
-                  Text('Customer City: ${bookingData['City']}'),
-                  Text('Remarks: ${bookingData['remarks']}'),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Status: ${bookingData['status']}'),
-                      ElevatedButton(
-                        onPressed: bookingData['status'] == 'done'
-                            ? null
-                            : () => markWorkDone(booking.id),
-                        child: const Text('Work Done'),
-                      ),
-                    ],
-                  ),
-                ],
+            DateTime? date;
+            try {
+              date = (bookingData['date'] as Timestamp).toDate();
+            } catch (e) {
+              date = null;
+            }
+
+            return Card(
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Booking ID: ${booking.id}'),
+                    const SizedBox(height: 8),
+                    Text('Date: ${date != null ? date.toLocal().toString().split(' ')[0] : 'No date available'}'),
+                    if (bookingData.containsKey('slot'))
+                      Text('Slot: ${bookingData['slot']}'),
+                    Text('Customer Phone: ${bookingData['customerPhone']}'),
+                    Text('Customer City: ${bookingData['customerCity']}'),
+                    Text('Remarks: ${bookingData['remarks']}'),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(
+                          onPressed: bookingData['status'] == 'done'
+                              ? null
+                              : () => markWorkDone(booking.id),
+                          child: const Text('Work Done'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 
   Future<void> markWorkDone(String bookingId) async {
     try {

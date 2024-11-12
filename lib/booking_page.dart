@@ -166,7 +166,7 @@ class _BookingPageState extends State<BookingPage> {
                   labelText: 'Select Slot',
                   border: OutlineInputBorder(),
                 ),
-                items: ['9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM']
+                items: ['9:00 AM', '2:00 PM', '6:00 PM']
                     .map((slot) => DropdownMenuItem<String>(
                           value: slot,
                           child: Text(slot),

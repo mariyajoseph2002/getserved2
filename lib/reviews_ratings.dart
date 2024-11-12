@@ -33,7 +33,7 @@ class _ReviewsRatingsPageState extends State<ReviewsRatingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reviews & Ratings'),
-        backgroundColor: Color.fromARGB(255, 243, 173, 103),
+        backgroundColor: Colors.teal,
       ),
       body: user == null
           ? const Center(child: Text('Please log in to view reviews.'))
@@ -59,7 +59,7 @@ class _ReviewsRatingsPageState extends State<ReviewsRatingsPage> {
             
 
                     return Card(
-                      color:  Color.fromARGB(255, 219, 194, 113),
+                    
                       margin: const EdgeInsets.all(8.0),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -76,6 +76,12 @@ class _ReviewsRatingsPageState extends State<ReviewsRatingsPage> {
                               style: const TextStyle(fontSize: 14),
                             ),
                             const SizedBox(height: 4),
+                            Text(
+                              'Customer: ${review['customerEmail']}',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(height: 4),
+
                           
                           ],
                         ),

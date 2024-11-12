@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'booking_page.dart'; // Assuming booking page is available
 import 'previousorders.dart'; // Assuming previous orders page is available
+import 'track.dart'; // Import track page
 
 class Customer extends StatefulWidget {
   const Customer({super.key});
@@ -41,6 +42,11 @@ class _CustomerState extends State<Customer> {
         context,
         MaterialPageRoute(builder: (context) => const PreviousOrders()),
       );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Track()), // Navigate to Track page
+      );
     }
   }
 
@@ -73,6 +79,10 @@ class _CustomerState extends State<Customer> {
             icon: Icon(Icons.history),
             label: "Previous Bookings",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.track_changes),
+            label: "Track Booking",
+          ),
         ],
       ),
     );
@@ -87,6 +97,8 @@ class _CustomerState extends State<Customer> {
         _buildServiceCard('Painting', Icons.brush),
         const SizedBox(height: 16),
         _buildServiceCard('Mechanic', Icons.build),
+        const SizedBox(height: 16),
+        _buildServiceCard('Plumber', Icons.plumbing),
       ],
     );
   }

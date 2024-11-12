@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:getserved/view_complaints.dart';
 import 'package:getserved/view_providers.dart';
 
 import 'login.dart';
@@ -157,6 +158,18 @@ class _AdminState extends State<Admin> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AddProvider(),
+                ),
+              );
+            },
+          ),
+           ListTile(
+            leading: const Icon(Icons.report_problem),
+            title: const Text('Providers Complaints'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ViewComplaints(),
                 ),
               );
             },
