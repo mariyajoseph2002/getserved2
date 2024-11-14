@@ -5,7 +5,7 @@ import 'login.dart';
 import 'reviews_ratings.dart';
 import 'edit_provider.dart'; // Import the edit provider page
 import 'complaints_page.dart'; // Import complaints page
-
+import 'chat_pageprotocus.dart';
 class Provider extends StatefulWidget {
   const Provider({super.key});
 
@@ -86,7 +86,7 @@ class _ProviderState extends State<Provider> {
       ),
     );
   }
-
+/* 
   Widget bookingDetails() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -153,6 +153,88 @@ class _ProviderState extends State<Provider> {
       },
     );
   }
+ */
+
+Widget bookingDetails() {
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('bookings')
+        .where('serviceProviderEmail', isEqualTo: providerEmail)
+        .where('status', isEqualTo: 'assigned')
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return const Center(child: Text('No bookings available.'));
+      }
+
+      final bookings = snapshot.data!.docs;
+
+      return ListView.builder(
+        itemCount: bookings.length,
+        itemBuilder: (context, index) {
+          var booking = bookings[index];
+          var bookingData = booking.data() as Map<String, dynamic>;
+
+          DateTime? date;
+          try {
+            date = (bookingData['date'] as Timestamp).toDate();
+          } catch (e) {
+            date = null;
+          }
+
+          return Card(
+            margin: const EdgeInsets.all(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Booking ID: ${booking.id}'),
+                  const SizedBox(height: 8),
+                  Text('Date: ${date != null ? date.toLocal().toString().split(' ')[0] : 'No date available'}'),
+                  if (bookingData.containsKey('slot'))
+                    Text('Slot: ${bookingData['slot']}'),
+                  Text('Customer Phone: ${bookingData['customerPhone']}'),
+                  Text('Customer City: ${bookingData['customerCity']}'),
+                  Text('Remarks: ${bookingData['remarks']}'),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: bookingData['status'] == 'done'
+                            ? null
+                            : () => markWorkDone(booking.id),
+                        child: const Text('Work Done'),
+                      ),
+                     /*  ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProChatPage(
+                                bookingId: booking.id,
+                                customerEmail: bookingData['customerEmail'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('Chat'),
+                      ), */
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
   Future<void> markWorkDone(String bookingId) async {
     try {
